@@ -47,8 +47,9 @@ public class SpreadsheetsResourceProxy extends RestResource implements RestSprea
 
 	@Override
 	public String[][] getSpreadsheetValues(String sheetId, String userId, String password) {
-		// TODO Auto-generated method stub
-		return null;
+		Log.info(String.format("REST getSpreadsheetValues: sheetId = %s, userId = %s\n", sheetId, userId));
+
+		return super.resultOrThrow(impl.getSpreadsheetValues(sheetId, userId, password));
 	}
 
 	@Override
@@ -76,12 +77,13 @@ public class SpreadsheetsResourceProxy extends RestResource implements RestSprea
 	@Override
 	public void deleteSpreadsheets(String userId) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public String[][] fetchSpreadsheetValues(String sheetId, String userId) {
-		// TODO Auto-generated method stub
-		return null;
+		Log.info(String.format("REST fetchSpreadsheetValues: sheetId = %s, userId: %s\n", sheetId, userId));
+
+		return super.resultOrThrow(impl.fetchSpreadsheetValues(sheetId, userId));
 	}
 }

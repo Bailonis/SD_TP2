@@ -221,7 +221,10 @@ public class ProxySpreadsheets implements Spreadsheets {
 		if (badParam(sheetId) || badParam(userId))
 			return error(BAD_REQUEST);
 
-		var sheet = sheets.get(sheetId);
+		String path = String.format("/%s/sheets/%s", SpreadsheetsProxyServer.hostname, sheetId);
+
+		String sheetString = DownloadFile.run(path);
+		var sheet = json.fromJson(sheetString, Spreadsheet.class);
 		if (sheet == null)
 			return error(NOT_FOUND);
 
@@ -240,7 +243,10 @@ public class ProxySpreadsheets implements Spreadsheets {
 		if (badParam(sheetId) || badParam(userId))
 			return error(BAD_REQUEST);
 
-		var sheet = sheets.get(sheetId);
+		String path = String.format("/%s/sheets/%s", SpreadsheetsProxyServer.hostname, sheetId);
+
+		String sheetString = DownloadFile.run(path);
+		var sheet = json.fromJson(sheetString, Spreadsheet.class);
 		if (sheet == null)
 			return error(NOT_FOUND);
 
@@ -314,7 +320,10 @@ public class ProxySpreadsheets implements Spreadsheets {
 		try {
 			var values = sheetValuesCache.getIfPresent(sheetId);
 			if (values == null) {
-				var sheet = sheets.get(sheetId);
+				String path = String.format("/%s/sheets/%s", SpreadsheetsProxyServer.hostname, sheetId);
+
+				String sheetString = DownloadFile.run(path);
+				var sheet = json.fromJson(sheetString, Spreadsheet.class);
 				values = engine.computeSpreadsheetValues(new SpreadsheetAdaptor(sheet));
 				sheetValuesCache.put(sheetId, values);
 			}
