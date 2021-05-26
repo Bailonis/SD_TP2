@@ -15,6 +15,8 @@ import tp1.impl.discovery.Discovery;
 import tp1.impl.srv.Domain;
 import tp1.impl.srv.proxy.requests.CreateDirectory;
 import tp1.impl.srv.proxy.requests.Delete;
+import tp1.impl.srv.rest.CustomLoggingFilter;
+import tp1.impl.srv.rest.GenericExceptionMapper;
 import tp1.impl.srv.rest.InsecureHostnameVerifier;
 
 public class SpreadsheetsProxyServer {
@@ -33,6 +35,7 @@ public class SpreadsheetsProxyServer {
 	public static String secret;
 
 	public static void main(String[] args) throws UnknownHostException {
+		Domain.set(args.length > 0 ? args[0] : "?");
 		String ip = InetAddress.getLocalHost().getHostAddress();
 		String serverURI = String.format(SERVER_BASE_URI, ip, PORT);
 		String FullServiceName = String.format("%s:%s", Domain.get(), SERVICE);
@@ -54,18 +57,19 @@ public class SpreadsheetsProxyServer {
 		}
 
 		HttpsURLConnection.setDefaultHostnameVerifier(new InsecureHostnameVerifier());
-
+		Discovery.getInstance().announce(FullServiceName, serverURI);
 		ResourceConfig config = new ResourceConfig();
 
 		config.register(SpreadsheetsResourceProxy.class);
+		config.register( GenericExceptionMapper.class );
+		config.register( CustomLoggingFilter.class);
 		
-		Discovery.getInstance().announce(FullServiceName, serverURI);
+		
 		try {
 			JdkHttpServerFactory.createHttpServer(URI.create(serverURI), config, SSLContext.getDefault());
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
-
 		
 	}
 }

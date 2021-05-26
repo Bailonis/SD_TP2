@@ -1,6 +1,5 @@
 package tp1.impl.srv.common;
 
-
 import static tp1.api.service.java.Result.error;
 import static tp1.api.service.java.Result.ok;
 import static tp1.api.service.java.Result.ErrorCode.BAD_REQUEST;
@@ -21,6 +20,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.gson.Gson;
 
 import tp1.api.Spreadsheet;
 import tp1.api.User;
@@ -35,6 +35,7 @@ import tp1.impl.engine.SpreadsheetEngineImpl;
 import tp1.impl.srv.Domain;
 import tp1.impl.srv.proxy.SpreadsheetsProxyServer;
 import tp1.impl.srv.proxy.requests.Create;
+import tp1.impl.srv.proxy.requests.DownloadFile;
 
 public class ProxySpreadsheets implements Spreadsheets {
 	private static Logger Log = Logger.getLogger(JavaSpreadsheets.class.getName());
@@ -54,6 +55,8 @@ public class ProxySpreadsheets implements Spreadsheets {
 	final Map<String, Spreadsheet> sheets = new ConcurrentHashMap<>();
 	final Map<String, Set<String>> userSheets = new ConcurrentHashMap<>();
 
+	private static Gson json = new Gson();
+
 	final String DOMAIN = '@' + Domain.get();
 
 	LoadingCache<String, User> users = CacheBuilder.newBuilder().maximumSize(USER_CACHE_CAPACITY)
@@ -65,13 +68,12 @@ public class ProxySpreadsheets implements Spreadsheets {
 			});
 
 	/*
-	 * This cache stores spreadsheet values. For local domain spreadsheets, the key is the sheetId,
-	 * for remote domain spreadsheets, the key is the sheetUrl.
+	 * This cache stores spreadsheet values. For local domain spreadsheets, the key
+	 * is the sheetId, for remote domain spreadsheets, the key is the sheetUrl.
 	 */
 	Cache<String, String[][]> sheetValuesCache = CacheBuilder.newBuilder().maximumSize(VALUES_CACHE_CAPACITY)
 			.expireAfterWrite(VALUES_CACHE_EXPIRATION, TimeUnit.SECONDS).build();
 
-	
 	public ProxySpreadsheets(String baseUri) {
 		engine = SpreadsheetEngineImpl.getInstance();
 		this.baseUri = baseUri;
@@ -89,7 +91,7 @@ public class ProxySpreadsheets implements Spreadsheets {
 			sheet.setSharedWith(ConcurrentHashMap.newKeySet());
 			sheets.put(sheetId, sheet);
 			userSheets.computeIfAbsent(sheet.getOwner(), (k) -> ConcurrentHashMap.newKeySet()).add(sheetId);
-			
+
 			String path = String.format("/%s/sheets/%s", SpreadsheetsProxyServer.hostname, sheetId);
 
 			Create.run(path, sheet);
@@ -121,16 +123,21 @@ public class ProxySpreadsheets implements Spreadsheets {
 	public Result<Spreadsheet> getSpreadsheet(String sheetId, String userId, String password) {
 		if (badParam(sheetId) || badParam(userId))
 			return error(BAD_REQUEST);
+		String path = String.format("/%s/sheets/%s", SpreadsheetsProxyServer.hostname, sheetId);
 
-		var sheet = sheets.get(sheetId);
-
+		String sheetString = DownloadFile.run(path);
+		var sheet = json.fromJson(sheetString, Spreadsheet.class);
+		System.out.println(sheet);
+		System.out.println("CONA " + userId);
 		if (sheet == null || userId == null || getUser(userId) == null)
 			return error(NOT_FOUND);
 
 		if (badParam(password) || wrongPassword(userId, password) || !sheet.hasAccess(userId, DOMAIN))
 			return error(FORBIDDEN);
-		else
+		else {
+
 			return ok(sheet);
+		}
 	}
 
 	@Override
@@ -146,6 +153,7 @@ public class ProxySpreadsheets implements Spreadsheets {
 			return error(FORBIDDEN);
 
 		if (sheet.getSharedWith().add(userId))
+
 			return ok();
 		else
 			return error(CONFLICT);
@@ -315,25 +323,26 @@ public class ProxySpreadsheets implements Spreadsheets {
 	}
 
 	/*
-	 * Return range values from cache, otherwise compute full values if the sheet is local, 
-	 * or import the full values from the remote server, storing the result in the cache
+	 * Return range values from cache, otherwise compute full values if the sheet is
+	 * local, or import the full values from the remote server, storing the result
+	 * in the cache
 	 */
 	public String[][] resolveRangeValues(String sheetUrl, String range, String userId) {
-		
+
 		String[][] values = null;
 		var sheet = sheets.get(url2Id(sheetUrl));
-		if (sheet != null )
+		if (sheet != null)
 			values = getComputedValues(sheet.getSheetId());
 		else {
-			var m = SPREADSHEETS_URI_PATTERN.matcher( sheetUrl );
-			if( m.matches() ) {
-				
+			var m = SPREADSHEETS_URI_PATTERN.matcher(sheetUrl);
+			if (m.matches()) {
+
 				var uri = m.group(1);
 				var sheetId = m.group(2);
 				var result = SpreadsheetsClientFactory.with(uri).fetchSpreadsheetValues(sheetId, userId);
-				if( result.isOK() ) {
+				if (result.isOK()) {
 					values = result.value();
-					sheetValuesCache.put( sheetUrl, values);					
+					sheetValuesCache.put(sheetUrl, values);
 				}
 			}
 			values = sheetValuesCache.getIfPresent(sheetUrl);

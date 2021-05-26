@@ -35,9 +35,9 @@ public abstract class AbstractRestServer {
 		String FullServiceName = String.format("%s:%s", Domain.get(), service);
 		HttpsURLConnection.setDefaultHostnameVerifier(new InsecureHostnameVerifier());
 		ResourceConfig config = new ResourceConfig();
-		Discovery.getInstance().announce(FullServiceName, serverURI);
-		registerResources( config );
 		
+		registerResources( config );
+		Discovery.getInstance().announce(FullServiceName, serverURI);
 		try {
 			JdkHttpServerFactory.createHttpServer(URI.create(serverURI.replace(ip,"0.0.0.0")), config, SSLContext.getDefault());
 		} catch (NoSuchAlgorithmException e) {

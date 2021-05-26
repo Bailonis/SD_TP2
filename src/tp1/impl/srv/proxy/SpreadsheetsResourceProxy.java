@@ -39,8 +39,9 @@ public class SpreadsheetsResourceProxy extends RestResource implements RestSprea
 
 	@Override
 	public Spreadsheet getSpreadsheet(String sheetId, String userId, String password) {
-		// TODO Auto-generated method stub
-		return null;
+		Log.info(String.format("REST getSpreadsheet: sheetId = %s, userId = %s\n", sheetId, userId));
+
+		return super.resultOrThrow(impl.getSpreadsheet(sheetId, userId, password));
 	}
 
 	@Override

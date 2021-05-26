@@ -8,5 +8,5 @@ public abstract class ProxyRequest {
 
     public static final String apiKey = "darbt7jb94zx2v4";
 	public static final String apiSecret = "4ocj6e7y7h6pcx3";
-	public static final String accessTokenStr = "CG0-j0nFfM0AAAAAAAAAAXSnDLzYTaUxhAndaL59g5NMnVgnVEmVJhXvBdAvdPBn";
+	public static final String accessTokenStr = "U8BFRzIoGT4AAAAAAAAAARyZCWGKwuT2iFfjSp-E2GhsKi9CUP4MQiwqOkJL88k-";
 }
