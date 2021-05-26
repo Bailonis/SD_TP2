@@ -76,8 +76,9 @@ public class SpreadsheetsResourceProxy extends RestResource implements RestSprea
 
 	@Override
 	public void deleteSpreadsheets(String userId) {
-		// TODO Auto-generated method stub
+		Log.info(String.format("REST deleteSpreadsheets: userId = %s\n", userId));
 
+		super.resultOrThrow(impl.deleteSpreadsheets(userId));
 	}
 
 	@Override

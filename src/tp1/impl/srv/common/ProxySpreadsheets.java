@@ -133,8 +133,8 @@ public class ProxySpreadsheets implements Spreadsheets {
 	public Result<Spreadsheet> getSpreadsheet(String sheetId, String userId, String password) {
 		if (badParam(sheetId) || badParam(userId))
 			return error(BAD_REQUEST);
-		String path = String.format("/%s/sheets/%s", SpreadsheetsProxyServer.hostname, sheetId);
-
+		String folder = "sheets." + id2domain(sheetId);
+		String path = String.format("/%s/sheets/%s", folder, sheetId);
 		String sheetString = DownloadFile.run(path);
 		var sheet = json.fromJson(sheetString, Spreadsheet.class);
 		
@@ -154,8 +154,8 @@ public class ProxySpreadsheets implements Spreadsheets {
 		if (badParam(sheetId) || badParam(userId))
 			return error(BAD_REQUEST);
 
-		String path = String.format("/%s/sheets/%s", SpreadsheetsProxyServer.hostname, sheetId);
-
+		String folder = "sheets." + id2domain(sheetId);
+		String path = String.format("/%s/sheets/%s", folder, sheetId);
 		String sheetString = DownloadFile.run(path);
 		var sheet = json.fromJson(sheetString, Spreadsheet.class);
 		if (sheet == null)
@@ -177,8 +177,8 @@ public class ProxySpreadsheets implements Spreadsheets {
 		if (badParam(sheetId) || badParam(userId))
 			return error(BAD_REQUEST);
 
-		String path = String.format("/%s/sheets/%s", SpreadsheetsProxyServer.hostname, sheetId);
-
+		String folder = "sheets." + id2domain(sheetId);
+		String path = String.format("/%s/sheets/%s", folder, sheetId);
 		String sheetString = DownloadFile.run(path);
 		var sheet = json.fromJson(sheetString, Spreadsheet.class);
 		if (sheet == null)
@@ -200,8 +200,8 @@ public class ProxySpreadsheets implements Spreadsheets {
 		if (badParam(sheetId) || badParam(userId) || badParam(cell) || badParam(rawValue))
 			return error(BAD_REQUEST);
 
-		String path = String.format("/%s/sheets/%s", SpreadsheetsProxyServer.hostname, sheetId);
-
+		String folder = "sheets." + id2domain(sheetId);
+		String path = String.format("/%s/sheets/%s", folder, sheetId);
 		String sheetString = DownloadFile.run(path);
 		var sheet = json.fromJson(sheetString, Spreadsheet.class);
 		if (sheet == null)
@@ -221,8 +221,8 @@ public class ProxySpreadsheets implements Spreadsheets {
 		if (badParam(sheetId) || badParam(userId))
 			return error(BAD_REQUEST);
 
-		String path = String.format("/%s/sheets/%s", SpreadsheetsProxyServer.hostname, sheetId);
-
+		String folder = "sheets." + id2domain(sheetId);
+		String path = String.format("/%s/sheets/%s", folder, sheetId);
 		String sheetString = DownloadFile.run(path);
 		var sheet = json.fromJson(sheetString, Spreadsheet.class);
 		if (sheet == null)
@@ -243,8 +243,8 @@ public class ProxySpreadsheets implements Spreadsheets {
 		if (badParam(sheetId) || badParam(userId))
 			return error(BAD_REQUEST);
 
-		String path = String.format("/%s/sheets/%s", SpreadsheetsProxyServer.hostname, sheetId);
-
+		String folder = "sheets." + id2domain(sheetId);
+		String path = String.format("/%s/sheets/%s", folder, sheetId);
 		String sheetString = DownloadFile.run(path);
 		var sheet = json.fromJson(sheetString, Spreadsheet.class);
 		if (sheet == null)
@@ -263,10 +263,14 @@ public class ProxySpreadsheets implements Spreadsheets {
 	@Override
 	public Result<Void> deleteSpreadsheets(String userId) {
 		var _userSheets = userSheets.getOrDefault(userId, DUMMY_SET);
+		List<String> deletePaths = new LinkedList<>();
 		for (var sheetId : _userSheets) {
+			String path = String.format("/%s/sheets/%s", SpreadsheetsProxyServer.hostname, sheetId);
 			sheets.remove(sheetId);
+			deletePaths.add(path);
 		}
 		_userSheets.clear();
+		Delete.run(deletePaths);
 
 		return ok();
 	}
@@ -320,8 +324,9 @@ public class ProxySpreadsheets implements Spreadsheets {
 		try {
 			var values = sheetValuesCache.getIfPresent(sheetId);
 			if (values == null) {
-				String path = String.format("/%s/sheets/%s", SpreadsheetsProxyServer.hostname, sheetId);
-
+				
+				String folder = "sheets." + id2domain(sheetId);
+				String path = String.format("/%s/sheets/%s", folder, sheetId);
 				String sheetString = DownloadFile.run(path);
 				var sheet = json.fromJson(sheetString, Spreadsheet.class);
 				values = engine.computeSpreadsheetValues(new SpreadsheetAdaptor(sheet));
@@ -337,6 +342,10 @@ public class ProxySpreadsheets implements Spreadsheets {
 	private String url2Id(String url) {
 		int i = url.lastIndexOf('/');
 		return url.substring(i + 1);
+	}
+	private String id2domain(String id) {
+		int i = id.lastIndexOf('@');
+		return id.substring(i + 1);
 	}
 
 	private boolean badParam(String str) {
@@ -358,9 +367,14 @@ public class ProxySpreadsheets implements Spreadsheets {
 	 * in the cache
 	 */
 	public String[][] resolveRangeValues(String sheetUrl, String range, String userId) {
-
+		String id = url2Id(sheetUrl);
+		String folder = "sheets." + id2domain(id);
+		String path = String.format("/%s/sheets/%s", folder, id);
 		String[][] values = null;
-		var sheet = sheets.get(url2Id(sheetUrl));
+		
+		
+		String sheetString = DownloadFile.run(path);
+		var sheet = json.fromJson(sheetString, Spreadsheet.class);
 		if (sheet != null)
 			values = getComputedValues(sheet.getSheetId());
 		else {
