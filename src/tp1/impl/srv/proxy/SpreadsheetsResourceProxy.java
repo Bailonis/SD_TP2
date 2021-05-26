@@ -61,14 +61,16 @@ public class SpreadsheetsResourceProxy extends RestResource implements RestSprea
 
 	@Override
 	public void shareSpreadsheet(String sheetId, String userId, String password) {
-		// TODO Auto-generated method stub
-		
+		Log.info(String.format("REST shareSpreadsheet: sheetId = %s, userId = %s\n", sheetId, userId));
+
+		super.resultOrThrow(impl.shareSpreadsheet(sheetId, userId, password));
 	}
 
 	@Override
 	public void unshareSpreadsheet(String sheetId, String userId, String password) {
-		// TODO Auto-generated method stub
-		
+		Log.info(String.format("REST unshareSpreadsheet: sheetId = %s, userId = %s\n", sheetId, userId));
+
+		super.resultOrThrow(impl.unshareSpreadsheet(sheetId, userId, password));
 	}
 
 	@Override

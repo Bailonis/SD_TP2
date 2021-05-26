@@ -154,16 +154,20 @@ public class ProxySpreadsheets implements Spreadsheets {
 		if (badParam(sheetId) || badParam(userId))
 			return error(BAD_REQUEST);
 
-		var sheet = sheets.get(sheetId);
+		String path = String.format("/%s/sheets/%s", SpreadsheetsProxyServer.hostname, sheetId);
+
+		String sheetString = DownloadFile.run(path);
+		var sheet = json.fromJson(sheetString, Spreadsheet.class);
 		if (sheet == null)
 			return error(NOT_FOUND);
 
 		if (badParam(password) || wrongPassword(sheet.getOwner(), password))
 			return error(FORBIDDEN);
 
-		if (sheet.getSharedWith().add(userId))
-
+		if (sheet.getSharedWith().add(userId)) {
+			Create.run(path, sheet);
 			return ok();
+		}
 		else
 			return error(CONFLICT);
 	}
@@ -173,7 +177,10 @@ public class ProxySpreadsheets implements Spreadsheets {
 		if (badParam(sheetId) || badParam(userId))
 			return error(BAD_REQUEST);
 
-		var sheet = sheets.get(sheetId);
+		String path = String.format("/%s/sheets/%s", SpreadsheetsProxyServer.hostname, sheetId);
+
+		String sheetString = DownloadFile.run(path);
+		var sheet = json.fromJson(sheetString, Spreadsheet.class);
 		if (sheet == null)
 			return error(NOT_FOUND);
 
@@ -182,6 +189,7 @@ public class ProxySpreadsheets implements Spreadsheets {
 
 		if (sheet.getSharedWith().remove(userId)) {
 			sheetValuesCache.invalidate(sheetId);
+			Create.run(path, sheet);
 			return ok();
 		} else
 			return error(NOT_FOUND);
