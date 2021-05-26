@@ -8,6 +8,9 @@ import static tp1.api.service.java.Result.ErrorCode.FORBIDDEN;
 import static tp1.api.service.java.Result.ErrorCode.NOT_FOUND;
 
 import java.util.HashSet;
+import java.util.LinkedList;
+
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,6 +38,7 @@ import tp1.impl.engine.SpreadsheetEngineImpl;
 import tp1.impl.srv.Domain;
 import tp1.impl.srv.proxy.SpreadsheetsProxyServer;
 import tp1.impl.srv.proxy.requests.Create;
+import tp1.impl.srv.proxy.requests.Delete;
 import tp1.impl.srv.proxy.requests.DownloadFile;
 
 public class ProxySpreadsheets implements Spreadsheets {
@@ -89,7 +93,7 @@ public class ProxySpreadsheets implements Spreadsheets {
 			sheet.setSheetId(sheetId);
 			sheet.setSheetURL(String.format("%s/%s", baseUri, sheetId));
 			sheet.setSharedWith(ConcurrentHashMap.newKeySet());
-			sheets.put(sheetId, sheet);
+			//sheets.put(sheetId, sheet);//acho que se pode tirar
 			userSheets.computeIfAbsent(sheet.getOwner(), (k) -> ConcurrentHashMap.newKeySet()).add(sheetId);
 
 			String path = String.format("/%s/sheets/%s", SpreadsheetsProxyServer.hostname, sheetId);
@@ -104,7 +108,10 @@ public class ProxySpreadsheets implements Spreadsheets {
 		if (badParam(sheetId))
 			return error(BAD_REQUEST);
 
-		var sheet = sheets.get(sheetId);
+		String path = String.format("/%s/sheets/%s", SpreadsheetsProxyServer.hostname, sheetId);
+
+		String sheetString = DownloadFile.run(path);
+		var sheet = json.fromJson(sheetString, Spreadsheet.class);
 
 		if (sheet == null)
 			return error(NOT_FOUND);
@@ -113,7 +120,10 @@ public class ProxySpreadsheets implements Spreadsheets {
 			return error(FORBIDDEN);
 
 		else {
-			sheets.remove(sheetId);
+			List<String> deletePaths = new LinkedList<>();
+			deletePaths.add(path);
+			Delete.run(deletePaths);
+			//sheets.remove(sheetId);
 			userSheets.computeIfAbsent(sheet.getOwner(), (k) -> ConcurrentHashMap.newKeySet()).remove(sheetId);
 			return ok();
 		}
@@ -127,8 +137,7 @@ public class ProxySpreadsheets implements Spreadsheets {
 
 		String sheetString = DownloadFile.run(path);
 		var sheet = json.fromJson(sheetString, Spreadsheet.class);
-		System.out.println(sheet);
-		System.out.println("CONA " + userId);
+		
 		if (sheet == null || userId == null || getUser(userId) == null)
 			return error(NOT_FOUND);
 
@@ -183,7 +192,10 @@ public class ProxySpreadsheets implements Spreadsheets {
 		if (badParam(sheetId) || badParam(userId) || badParam(cell) || badParam(rawValue))
 			return error(BAD_REQUEST);
 
-		var sheet = sheets.get(sheetId);
+		String path = String.format("/%s/sheets/%s", SpreadsheetsProxyServer.hostname, sheetId);
+
+		String sheetString = DownloadFile.run(path);
+		var sheet = json.fromJson(sheetString, Spreadsheet.class);
 		if (sheet == null)
 			return error(NOT_FOUND);
 
@@ -192,6 +204,7 @@ public class ProxySpreadsheets implements Spreadsheets {
 
 		sheet.setCellRawValue(cell, rawValue);
 		sheetValuesCache.invalidate(sheetId);
+		Create.run(path, sheet);
 		return ok();
 	}
 
