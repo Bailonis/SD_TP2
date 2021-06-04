@@ -4,6 +4,8 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -46,9 +48,10 @@ public class SpreadsheetsProxyServer {
 
 		boolean freshStart = Boolean.parseBoolean(args[0]);
 		String dirName = "/" + hostname;
-
 		if(freshStart){		
-			Delete.run(dirName);
+			List<String> deletePaths = new LinkedList<>();
+			deletePaths.add(dirName);
+			Delete.run(deletePaths);
 
 			CreateDirectory.run(dirName);
 

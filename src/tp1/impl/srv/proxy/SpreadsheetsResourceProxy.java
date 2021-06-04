@@ -21,7 +21,7 @@ public class SpreadsheetsResourceProxy extends RestResource implements RestSprea
 	final Spreadsheets impl;
 
 	public SpreadsheetsResourceProxy() {
-		var uri = String.format("https://%s:%d/rest%s", IP.hostAddress(), SpreadsheetsRestServer.PORT, PATH);
+		var uri = String.format("https://%s:%d/rest%s", IP.hostAddress(), SpreadsheetsProxyServer.PORT, PATH);
 		impl = new ProxySpreadsheets(uri);
 	}
 
