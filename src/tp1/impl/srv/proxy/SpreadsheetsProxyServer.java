@@ -32,7 +32,7 @@ public class SpreadsheetsProxyServer {
 	public static String hostname;
 	protected static String SERVER_BASE_URI = "https://%s:%s/rest";
 
-	
+
 
 	public static String secret;
 
@@ -41,21 +41,22 @@ public class SpreadsheetsProxyServer {
 		String ip = InetAddress.getLocalHost().getHostAddress();
 		String serverURI = String.format(SERVER_BASE_URI, ip, PORT);
 		String FullServiceName = String.format("%s:%s", Domain.get(), SERVICE);
-		
+
 		secret = args[1];
-		
+
 		hostname = InetAddress.getLocalHost().getHostName();
 
-		boolean freshStart = Boolean.parseBoolean(args[0]);
+		boolean freshStart = Boolean.parseBoolean(args[1]);
 		String dirName = "/" + hostname;
-		if(freshStart){		
+
+		if(freshStart){
 			List<String> deletePaths = new LinkedList<>();
 			deletePaths.add(dirName);
 			Delete.run(deletePaths);
 
-			CreateDirectory.run(dirName);
+	//		CreateDirectory.run(dirName);
 
-			CreateDirectory.run(dirName + "/sheets");
+	//		CreateDirectory.run(dirName + "/sheets");
 
 		}
 
@@ -66,13 +67,13 @@ public class SpreadsheetsProxyServer {
 		config.register(SpreadsheetsResourceProxy.class);
 		config.register( GenericExceptionMapper.class );
 		config.register( CustomLoggingFilter.class);
-		
-		
+
+
 		try {
 			JdkHttpServerFactory.createHttpServer(URI.create(serverURI), config, SSLContext.getDefault());
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 }
