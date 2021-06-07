@@ -39,7 +39,7 @@ public class JavaSpreadsheets implements Spreadsheets {
 	private static final long USER_CACHE_CAPACITY = 100;
 	private static final long USER_CACHE_EXPIRATION = 120;
 	private static final long VALUES_CACHE_CAPACITY = 100;
-	private static final long VALUES_CACHE_EXPIRATION = 120;
+	private static final long VALUES_CACHE_EXPIRATION = 20;
 	private static final Pattern SPREADSHEETS_URI_PATTERN = Pattern.compile("(.+)/spreadsheets/(.+)");
 
 	private static final Set<String> DUMMY_SET = new HashSet<>();
