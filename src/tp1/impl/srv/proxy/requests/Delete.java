@@ -20,20 +20,16 @@ import tp1.impl.srv.proxy.arguments.DeleteBatchArgs;
 
 import org.pac4j.scribe.builder.api.DropboxApi20;
 
+public class Delete {
 
-/**
- * Calls dropbox's Delete endpoint
- */
-public class Delete{
+	private static Logger Log = Logger.getLogger(SpreadsheetsProxyServer.class.getName());
 
-    private static Logger Log = Logger.getLogger(SpreadsheetsProxyServer.class.getName());
+	private static final String DELETE_BATCH_URL = "https://api.dropboxapi.com/2/files/delete_batch";
 
-    private static final String DELETE_BATCH_URL = "https://api.dropboxapi.com/2/files/delete_batch";
-
-    private static boolean execute(List<DeleteArgs> args){
-        OAuthRequest deleteBatch = new OAuthRequest(Verb.POST, DELETE_BATCH_URL);
-		OAuth20Service service = new ServiceBuilder(ProxyRequest.apiKey)
-						.apiSecret(ProxyRequest.apiSecret).build(DropboxApi20.INSTANCE);
+	private static boolean execute(List<DeleteArgs> args) {
+		OAuthRequest deleteBatch = new OAuthRequest(Verb.POST, DELETE_BATCH_URL);
+		OAuth20Service service = new ServiceBuilder(ProxyRequest.apiKey).apiSecret(ProxyRequest.apiSecret)
+				.build(DropboxApi20.INSTANCE);
 		OAuth2AccessToken accessToken = new OAuth2AccessToken(ProxyRequest.accessTokenStr);
 
 		Gson json = new Gson();
@@ -42,18 +38,18 @@ public class Delete{
 
 		deleteBatch.setPayload(json.toJson(new DeleteBatchArgs(args)));
 
-        service.signRequest(accessToken, deleteBatch);
-        
-        Response r = null;
+		service.signRequest(accessToken, deleteBatch);
 
-        try {
+		Response r = null;
+
+		try {
 			r = service.execute(deleteBatch);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
-        }
-        
-        if(r.getCode() == 200) {
+		}
+
+		if (r.getCode() == 200) {
 			return true;
 		} else {
 			System.err.println("HTTP Error Code: " + r.getCode() + ": " + r.getMessage());
@@ -64,39 +60,38 @@ public class Delete{
 			}
 			return false;
 		}
-    }
+	}
 
-    public static boolean run(List<String> paths){
+	public static boolean run(List<String> paths) {
 		Log.info("Deleting " + paths.size() + " files");
 		boolean success = false;
 
 		List<DeleteArgs> args = new LinkedList<>();
-		
-		for(String path: paths)
+
+		for (String path : paths)
 			args.add(new DeleteArgs(path));
-        
-        for(int i = 0; i < ProxyRequest.RETRIES; i++){
-            if(success = execute(args))
+
+		for (int i = 0; i < ProxyRequest.RETRIES; i++) {
+			if (success = execute(args))
 				break;
-				
+
 			try {
-				Log.info("I sleep");
 				Thread.sleep(ProxyRequest.SLEEP_TIME);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-        }
+		}
 
-		if(success){
+		if (success) {
 			Log.info("Deletion for " + paths.size() + " files successful");
 			return true;
-		}else{
+		} else {
 			Log.info("Failed to delete " + paths.size() + " files");
 			return false;
 		}
 	}
-	
-	public static boolean run(String path){
+
+	public static boolean run(String path) {
 		List<String> paths = new LinkedList<>();
 
 		paths.add(path);

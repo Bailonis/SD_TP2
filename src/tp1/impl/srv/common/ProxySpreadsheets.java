@@ -7,7 +7,6 @@ import static tp1.api.service.java.Result.ErrorCode.CONFLICT;
 import static tp1.api.service.java.Result.ErrorCode.FORBIDDEN;
 import static tp1.api.service.java.Result.ErrorCode.NOT_FOUND;
 
-import java.util.HashSet;
 import java.util.LinkedList;
 
 import java.util.List;
@@ -49,8 +48,6 @@ public class ProxySpreadsheets implements Spreadsheets {
 	private static final long VALUES_CACHE_CAPACITY = 100;
 	private static final long VALUES_CACHE_EXPIRATION = 120;
 	private static final Pattern SPREADSHEETS_URI_PATTERN = Pattern.compile("(.+)/spreadsheets/(.+)");
-
-	private static final Set<String> DUMMY_SET = new HashSet<>();
 
 	final String baseUri;
 	final SpreadsheetEngine engine;

@@ -15,7 +15,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import tp1.impl.discovery.Discovery;
 import tp1.impl.srv.Domain;
-import tp1.impl.srv.proxy.requests.CreateDirectory;
 import tp1.impl.srv.proxy.requests.Delete;
 import tp1.impl.srv.rest.CustomLoggingFilter;
 import tp1.impl.srv.rest.GenericExceptionMapper;
@@ -42,8 +41,6 @@ public class SpreadsheetsProxyServer {
 		String serverURI = String.format(SERVER_BASE_URI, ip, PORT);
 		String FullServiceName = String.format("%s:%s", Domain.get(), SERVICE);
 
-		secret = args[1];
-
 		hostname = InetAddress.getLocalHost().getHostName();
 
 		boolean freshStart = Boolean.parseBoolean(args[1]);
@@ -53,11 +50,6 @@ public class SpreadsheetsProxyServer {
 			List<String> deletePaths = new LinkedList<>();
 			deletePaths.add(dirName);
 			Delete.run(deletePaths);
-
-	//		CreateDirectory.run(dirName);
-
-	//		CreateDirectory.run(dirName + "/sheets");
-
 		}
 
 		HttpsURLConnection.setDefaultHostnameVerifier(new InsecureHostnameVerifier());

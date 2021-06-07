@@ -39,11 +39,8 @@ public class DownloadFile {
 		Response r = null;
 
 		try {
-			Long curr = System.currentTimeMillis();
 			r = service.execute(downloadFile);
-			Log.info("Time Elapsed Download: " + (System.currentTimeMillis() - curr));
 		} catch (Exception e) {
-			Log.info("Damn dropbox!");
 			return null;
 		}
 
@@ -65,7 +62,6 @@ public class DownloadFile {
 	}
 
 	public static String run(String filePath) {
-		Log.info("Downloading " + filePath);
 		boolean success = false;
 		String o = null;
 
@@ -76,12 +72,10 @@ public class DownloadFile {
 					success = true;
 					break;
 				}
-				Log.info("I SLEEP");
 				Thread.sleep(1000);
 			} catch (WebApplicationException e) {
 				break;
 			} catch (Exception e) {
-				Log.info("SearchFile: What the frog");
 			}
 
 		}

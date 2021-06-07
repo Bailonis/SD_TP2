@@ -9,14 +9,12 @@ import tp1.api.service.java.Spreadsheets;
 import tp1.api.service.rest.RestSpreadsheets;
 import tp1.impl.srv.common.ProxySpreadsheets;
 import tp1.impl.srv.rest.RestResource;
-import tp1.impl.srv.rest.SpreadsheetsResources;
-import tp1.impl.srv.rest.SpreadsheetsRestServer;
 import tp1.impl.utils.IP;
 
 @Singleton
 @Path(RestSpreadsheets.PATH)
 public class SpreadsheetsResourceProxy extends RestResource implements RestSpreadsheets {
-	private static Logger Log = Logger.getLogger(SpreadsheetsResources.class.getName());
+	private static Logger Log = Logger.getLogger(SpreadsheetsResourceProxy.class.getName());
 
 	final Spreadsheets impl;
 
