@@ -8,11 +8,45 @@ import com.gembox.spreadsheet.ExcelFile;
 import com.gembox.spreadsheet.ExcelWorksheet;
 import com.gembox.spreadsheet.SpreadsheetInfo;
 
-import tp1.engine.AbstractSpreadsheet;
-import tp1.engine.CellRange;
-import tp1.engine.SpreadsheetEngine;
+import tp1.api.engine.AbstractSpreadsheet;
+import tp1.api.engine.SpreadsheetEngine;
+import tp1.util.CellRange;
 
 
+/**
+Example of use:
+
+Spreadsheet sheet = ...
+String[][] values = SpreadsheetEngineImpl.getInstance().computeSpreadsheetValues(new AbstractSpreadsheet() {
+	@Override
+	public int rows() {
+		return sheet.getRows();
+	}
+
+	@Override
+	public int columns() {
+		return sheet.getColumns();
+	}
+
+	@Override
+	public String sheetId() {
+		return sheet.getSheetId();
+	}
+
+	@Override
+	public String cellRawValue(int row, int col) {
+		try {
+			return sheet.getRawValues()[row][col];
+		} catch (IndexOutOfBoundsException e) {
+			return "#ERROR?";
+		}
+	}
+
+	@Override
+	public String[][] getRangeValues(String sheetURL, String range) {
+		// get remote range values
+	});
+*/
 public class SpreadsheetEngineImpl implements SpreadsheetEngine {
 	
 	private static final String ERROR = "#ERROR?";
@@ -26,11 +60,11 @@ public class SpreadsheetEngineImpl implements SpreadsheetEngine {
 	
 	public String[][] computeSpreadsheetValues(AbstractSpreadsheet sheet) {
 		ExcelFile workbook = new ExcelFile();
-		ExcelWorksheet worksheet = workbook.addWorksheet(sheet.sheetId());
+		ExcelWorksheet worksheet = workbook.addWorksheet(sheet.getSheetId());
 
-		for (int i = 0; i < sheet.rows(); i++)
-			for (int j = 0; j < sheet.columns(); j++) {
-				String rawVal = sheet.cellRawValue(i, j);
+		for (int i = 0; i < sheet.getRows(); i++)
+			for (int j = 0; j < sheet.getColumns(); j++) {
+				String rawVal = sheet.getCellRawValue(i, j);
 				ExcelCell cell = worksheet.getCell(i, j);
 				setCell(sheet, worksheet, cell, rawVal);
 			}
@@ -42,9 +76,9 @@ public class SpreadsheetEngineImpl implements SpreadsheetEngine {
 //		}
 		worksheet.calculate();
 
-		var cells = new String[sheet.rows()][sheet.columns()];
-		for (int row = 0; row < sheet.rows(); row++) {
-			for (int col = 0; col < sheet.columns(); col++) {
+		var cells = new String[sheet.getRows()][sheet.getColumns()];
+		for (int row = 0; row < sheet.getRows(); row++) {
+			for (int col = 0; col < sheet.getColumns(); col++) {
 				ExcelCell cell = worksheet.getCell(row, col);
 				var value = cell.getValue();
 				cells[row][col] = value != null ? value.toString() : ERROR;

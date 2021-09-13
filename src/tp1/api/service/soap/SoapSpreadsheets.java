@@ -1,6 +1,5 @@
 package tp1.api.service.soap;
 
-import jakarta.jws.WebMethod;
 import jakarta.jws.WebService;
 import tp1.api.Spreadsheet;
 
@@ -91,11 +90,23 @@ public interface SoapSpreadsheets {
 	 */
 	String[][] getSpreadsheetValues(String sheetId, String userId, String password) throws SheetsException;
 	
+	/**
+	* Deletes all spreadsheets, belonging to a given user.
+	*
+	* @param userId - users whose spreadsheets are to be deleted
+	*
+	*/
+	void deleteUserSpreadsheets(String userId);
 	
-	@WebMethod
-	void deleteSpreadsheets(String userId) throws SheetsException;
+	/**
+	 * Returns all the values in the Spreadsheet, as a matrix of String
+	 * 
+	 * @param sheetId - the sheet being shared.
+	 * @param user - sheet owner
+	 * 
+	 * @return String matrix, contaning all values in the sheet
+	 */
+	Spreadsheet getSpreadsheetComputed(String sheet);
 	
-
-	@WebMethod 
-	String[][] fetchSpreadsheetValues(String sheetUrl, String userId) throws SheetsException;
+	
 }

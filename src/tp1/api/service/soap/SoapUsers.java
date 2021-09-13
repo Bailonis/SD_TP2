@@ -54,8 +54,13 @@ public interface SoapUsers {
 	 */
 	@WebMethod
 	List<User> searchUsers(String pattern) throws UsersException;
-
 	
+	/**
+	 * Checks to see is there is a user for which the pattern is a substring of the userId (of the user), case-insensitive.
+	 * @param pattern substring to search
+	 * @return true is there is such a user, false otherwise
+	 *
+	 */
 	@WebMethod
-	User fetchUser( String userId ) throws UsersException ;
+	boolean hasUsers(String pattern);
 }

@@ -101,20 +101,5 @@ public class User {
 				+ "]";
 	}
 	
-	/*
-	 * Extended User Operations
-	 */
 	
-	public void updateUser( User other )  {
-		if( other.getEmail() != null )
-			setEmail( other.getEmail() );
-		if( other.getFullName() != null )
-			setFullName( other.getFullName() );
-		if( other.getPassword() != null )
-			setPassword( other.getPassword() );
-	}
-	
-	public User secureCopy() {
-		return new User( getUserId(), getFullName(), getEmail(), "");			
-	}
 }
