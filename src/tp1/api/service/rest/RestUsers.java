@@ -1,6 +1,6 @@
 package tp1.api.service.rest;
 
-import java.util.*;
+import java.util.List;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -89,19 +89,17 @@ public interface RestUsers {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	List<User> searchUsers(@QueryParam("query") String pattern);
+
 	
-	/**
-	 * Returns the list of users for which the pattern is a substring of the userId (of the user), case-insensitive.
-	 * The password of the users returned by the query must be set to the empty string "".
-	 * @param pattern substring to search
-	 * @return 200 when the search was successful, regardless of the number of hits (including 0 hits).
-	 *
-	 */
+	/*
+	 * Extended Users Service.
+	 * 
+	 * Operations intended to be used among servers...
+	 * 
+	 * */
 	@GET
-	@Path("/")
+	@Path("/{userId}/x")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<User> hasUsers(@QueryParam("procura")String pattern);
-	
-	
+	User fetchUser(@PathParam("userId") String userId);
 
 }

@@ -47,16 +47,6 @@ public interface RestSpreadsheets {
 	@DELETE
 	@Path("/{sheetId}")
 	void deleteSpreadsheet(@PathParam("sheetId") String sheetId, @QueryParam("password") String password);
-	
-	/**
-	* Deletes all spreadsheets, belonging to a given user.
-	*
-	* @param userId - users whose spreadsheets are to be deleted
-	*
-	*/
-	@DELETE
-	@Path("/remove")
-	void deleteUserSpreadsheets(  @QueryParam("userId")String userId);
 
 	/**
 	 * Retrieve a spreadsheet.
@@ -81,7 +71,7 @@ public interface RestSpreadsheets {
 	 * Retrieves the calculated values of a spreadsheet.
 	 * @param userId - The user requesting the values
 	 * @param sheetId - the spreadsheet whose values are being retrieved.
-	 * @param password - The password of the user performing the operation.
+	 * @param password - the password of the owner of the spreadsheet
 	 * 
 	 * @return 200, if the operation is successful
 	 * 		   403, if the spreadsheet is not shared with user, or the user is not the owner, or the password is incorrect.
@@ -102,7 +92,7 @@ public interface RestSpreadsheets {
 	 * @param sheetId - the spreadsheet whose values are being retrieved.
 	 * @param cell - the cell being updated
 	 * @param rawValue - the new raw value of the cell
-	 * @param password - The password of the user performing the operation.
+	 * @param password - the password of the owner of the spreadsheet
 	 * 
 	 * @return 204, if the operation was successful
 	 * 		  404, if no spreadsheet exists with the given sheetid
@@ -155,17 +145,21 @@ public interface RestSpreadsheets {
 	void unshareSpreadsheet( @PathParam("sheetId") String sheetId, @PathParam("userId") String userId, 
 			@QueryParam("password") String password);
 	
-	/**
-	 * Returns all the values in the Spreadsheet, as a matrix of String
-	 * 
-	 * @param sheetId - the sheet being shared.
-	 * @param user - sheet owner
-	 * 
-	 * @return String matrix, contaning all values in the sheet
-	 */
-	@GET
-	@Path("/{sheetId}/users/range")
-	@Produces(MediaType.APPLICATION_JSON)
-	String[][] getSpreadsheet(@PathParam("sheetId") String sheetId,@QueryParam("user")String user);
 	
+	/*
+	 * Extended Spreadsheets Service.
+	 * 
+	 * Operations intended to be used among servers...
+	 * 
+	 * */
+	@DELETE
+	@Path("/{userId}/sheets")
+	@Consumes(MediaType.APPLICATION_JSON)
+	void deleteSpreadsheets(@PathParam("userId") String userId);
+
+	
+	@GET
+	@Path("/{sheetId}/fetch")
+	@Produces(MediaType.APPLICATION_JSON)
+	String[][] fetchSpreadsheetValues(@PathParam("sheetId") String sheetId, @QueryParam("userId") String userId);
 }
